@@ -1,0 +1,94 @@
+// File: prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// NOTE: Enum dihapus karena SQLite tidak support.
+// Kita ganti dengan String dan validasi di level aplikasi nanti.
+
+// 1. Model User
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("USER") // Tipe diganti String. Opsi: "USER", "ADMIN"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  transactions Transaction[]
+
+  @@map("users")
+}
+
+// 2. Model Supplier
+model Supplier {
+  id          Int      @id @default(autoincrement())
+  name        String
+  contactInfo String?
+  address     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  items Item[]
+
+  @@map("suppliers")
+}
+
+// 3. Model Item
+model Item {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  sku         String   @unique
+  quantity    Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  supplierId Int?
+  supplier   Supplier? @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+
+  transactionDetails TransactionDetail[]
+
+  @@index([name])
+  @@map("items")
+}
+
+// 4. Model Transaction
+model Transaction {
+  id        Int      @id @default(autoincrement())
+  type      String   // Tipe diganti String. Opsi: "IN", "OUT"
+  date      DateTime @default(now())
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  details TransactionDetail[]
+
+  @@index([date])
+  @@map("transactions")
+}
+
+// 5. Junction Table
+model TransactionDetail {
+  id            Int      @id @default(autoincrement())
+  quantity      Int
+  pricePerUnit  Float
+  
+  transactionId Int
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+  itemId        Int
+  item          Item        @relation(fields: [itemId], references: [id], onDelete: Restrict)
+
+  @@map("transaction_details")
+}
