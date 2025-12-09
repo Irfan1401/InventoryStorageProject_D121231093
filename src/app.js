@@ -4,6 +4,7 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan'); // Logger middleware 
 const prisma = require('./config/database');
+const authRoutes = require('./routes/auth.routes'); // Import Route Auth
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,7 +24,6 @@ app.use(morgan('dev'));
 // ==========================
 
 // A. Health Check Endpoint (Wajib ada di requirements)
-// Digunakan AWS/Deployment untuk cek apakah server hidup
 app.get('/', (req, res) => {
   res.status(200).json({
     success: true,
@@ -33,10 +33,13 @@ app.get('/', (req, res) => {
   });
 });
 
-// B. Test Database Connection
+// B. Auth Routes (REGISTER & LOGIN) - UPDATE DAY 3 DISINI
+// URL akan menjadi: http://localhost:3000/api/auth/register
+app.use('/api/auth', authRoutes);
+
+// C. Test Database Connection
 app.get('/api/test-db', async (req, res) => {
   try {
-    // Coba ambil 1 user
     const users = await prisma.user.findMany({ take: 1 });
     res.status(200).json({
       success: true,
@@ -53,7 +56,7 @@ app.get('/api/test-db', async (req, res) => {
   }
 });
 
-// C. 404 Handler (Untuk route yang tidak ditemukan)
+// D. 404 Handler (Wajib ditaruh paling bawah dari routes lain)
 app.use((req, res) => {
   res.status(404).json({
     success: false,
