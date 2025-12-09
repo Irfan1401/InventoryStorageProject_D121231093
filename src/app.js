@@ -5,6 +5,7 @@ const cors = require('cors');
 const morgan = require('morgan'); // Logger middleware 
 const prisma = require('./config/database');
 const authRoutes = require('./routes/auth.routes'); // Import Route Auth
+const itemRoutes = require('./routes/item.routes'); // <--- 1. IMPORT ROUTE ITEM (UPDATE DAY 4)
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,7 +24,7 @@ app.use(morgan('dev'));
 // 2. ROUTES
 // ==========================
 
-// A. Health Check Endpoint (Wajib ada di requirements)
+// A. Health Check Endpoint
 app.get('/', (req, res) => {
   res.status(200).json({
     success: true,
@@ -33,11 +34,15 @@ app.get('/', (req, res) => {
   });
 });
 
-// B. Auth Routes (REGISTER & LOGIN) - UPDATE DAY 3 DISINI
-// URL akan menjadi: http://localhost:3000/api/auth/register
+// B. Auth Routes (REGISTER & LOGIN)
+// URL: http://localhost:3000/api/auth/register
 app.use('/api/auth', authRoutes);
 
-// C. Test Database Connection
+// C. Item Routes (PROTECTED & PUBLIC) - UPDATE DAY 4 DISINI
+// URL: http://localhost:3000/api/items
+app.use('/api/items', itemRoutes); // <--- 2. DAFTARKAN ROUTE ITEM
+
+// D. Test Database Connection
 app.get('/api/test-db', async (req, res) => {
   try {
     const users = await prisma.user.findMany({ take: 1 });
@@ -56,7 +61,7 @@ app.get('/api/test-db', async (req, res) => {
   }
 });
 
-// D. 404 Handler (Wajib ditaruh paling bawah dari routes lain)
+// E. 404 Handler (Wajib ditaruh paling bawah)
 app.use((req, res) => {
   res.status(404).json({
     success: false,
