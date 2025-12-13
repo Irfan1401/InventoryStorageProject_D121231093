@@ -1,25 +1,24 @@
-// File: src/controllers/item.controller.js
 const prisma = require('../config/database');
 
-// Helper Response
+
 const response = (res, statusCode, success, message, data, pagination) => {
   return res.status(statusCode).json({
     success,
     message,
     data,
-    pagination // Field pagination hanya muncul jika ada datanya
+    pagination 
   });
 };
 
-// 1. CREATE ITEM (Sudah dibuat kemarin, kita rapikan sedikit)
+
 exports.createItem = async (req, res) => {
   try {
     const { name, sku, quantity, price, supplierId } = req.body;
 
-    // Validasi sederhana
+
     if (!name || !sku) return response(res, 400, false, 'Name and SKU are required');
 
-    // Cek SKU duplikat
+   
     const existingItem = await prisma.item.findUnique({ where: { sku } });
     if (existingItem) return response(res, 409, false, 'SKU already exists');
 
@@ -38,36 +37,35 @@ exports.createItem = async (req, res) => {
   }
 };
 
-// 2. GET ALL ITEMS (Pagination + Search + Sorting) - SYARAT WAJIB
 exports.getAllItems = async (req, res) => {
   try {
-    // Ambil parameter dari Query URL (default: page 1, limit 10)
+    
     const { page = 1, limit = 10, search, sortBy = 'createdAt', order = 'desc' } = req.query;
     
-    // Logika Pagination Prisma
+   
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
-    // Logika Search (Case Insensitive Partial Match)
+   
     let whereCondition = {};
     if (search) {
       whereCondition = {
         OR: [
-          { name: { contains: search } }, // Cari di nama
-          { sku: { contains: search } }   // Cari di SKU
+          { name: { contains: search } }, 
+          { sku: { contains: search } }   
         ]
       };
     }
 
-    // Query Database (Get Data)
+  
     const items = await prisma.item.findMany({
       where: whereCondition,
       skip: skip,
       take: parseInt(limit),
-      orderBy: { [sortBy]: order }, // Dynamic Sorting
-      include: { supplier: true }   // Join table Supplier
+      orderBy: { [sortBy]: order }, 
+      include: { supplier: true }   
     });
 
-    // Query Database (Hitung Total Data untuk Pagination)
+
     const totalData = await prisma.item.count({ where: whereCondition });
 
     return response(res, 200, true, 'List of items fetched', items, {
@@ -83,7 +81,7 @@ exports.getAllItems = async (req, res) => {
   }
 };
 
-// 3. GET ITEM BY ID
+
 exports.getItemById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -100,13 +98,12 @@ exports.getItemById = async (req, res) => {
   }
 };
 
-// 4. UPDATE ITEM
 exports.updateItem = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, sku, quantity } = req.body;
 
-    // Cek dulu apakah barangnya ada
+ 
     const existingItem = await prisma.item.findUnique({ where: { id: parseInt(id) } });
     if (!existingItem) return response(res, 404, false, 'Item not found');
 
@@ -121,12 +118,11 @@ exports.updateItem = async (req, res) => {
   }
 };
 
-// 5. DELETE ITEM
 exports.deleteItem = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Cek dulu apakah barangnya ada
+
     const existingItem = await prisma.item.findUnique({ where: { id: parseInt(id) } });
     if (!existingItem) return response(res, 404, false, 'Item not found');
 

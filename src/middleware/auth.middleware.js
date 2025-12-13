@@ -1,8 +1,7 @@
-// File: src/middleware/auth.middleware.js
 const jwt = require('jsonwebtoken');
 
 const verifyToken = (req, res, next) => {
-  // 1. Ambil token dari Header (Format: "Bearer <token>")
+ 
   const authHeader = req.headers['authorization'];
   
   if (!authHeader) {
@@ -12,7 +11,7 @@ const verifyToken = (req, res, next) => {
     });
   }
 
-  // Pisahkan "Bearer" dan token aslinya
+  
   const token = authHeader.split(' ')[1];
 
   if (!token) {
@@ -23,13 +22,12 @@ const verifyToken = (req, res, next) => {
   }
 
   try {
-    // 2. Verifikasi Token dengan Secret Key
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    // 3. Simpan data user ke dalam request agar bisa dipakai di Controller
+   
     req.user = decoded; 
     
-    next(); // Lanjut ke controller berikutnya
+    next(); 
   } catch (error) {
     return res.status(403).json({
       success: false,
