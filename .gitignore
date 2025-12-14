@@ -1,17 +1,7 @@
-# Dependency
-node_modules
-
-# Environment Variables (RAHASIA)
+node_modules/
 .env
-
-# Database SQLite (Jangan di-upload, cukup schema & migration)
+*.pem
+*.sqlite
 *.db
-*.db-journal
-
-# Logs
 *.log
-npm-debug.log*
-
-# OS files
 .DS_Store
-Thumbs.db
