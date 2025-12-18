@@ -9,8 +9,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// NOTE: Enum dihapus karena SQLite tidak support.
-// Kita ganti dengan String dan validasi di level aplikasi nanti.
+
 
 // 1. Model User
 model User {
@@ -18,7 +17,7 @@ model User {
   email     String   @unique
   password  String
   name      String
-  role      String   @default("USER") // Tipe diganti String. Opsi: "USER", "ADMIN"
+  role      String   @default("USER") 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -63,7 +62,7 @@ model Item {
 // 4. Model Transaction
 model Transaction {
   id        Int      @id @default(autoincrement())
-  type      String   // Tipe diganti String. Opsi: "IN", "OUT"
+  type      String   
   date      DateTime @default(now())
   notes     String?
   createdAt DateTime @default(now())
